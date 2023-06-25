@@ -1,0 +1,14 @@
+{
+    "name": "slt-app",
+    "version": "1.6.4",
+    "description": "simple label tool",
+    "author": "lengjingify",
+    "keywords": [
+      "label tool",
+      "ai"
+    ],
+    "scripts": {
+      "start": "parcel index.html --no-source-maps"
+    }
+  }
+  
