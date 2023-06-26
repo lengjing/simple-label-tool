@@ -1,13 +1,9 @@
-import react from 'react';
 import { createRoot } from "react-dom/client";
+import SLTApp from "./components/SLTApp";
 
-const Test = ()=>{
-    return (
-        <div>hello word</div>
-    )
+export const createSLTApp = () => {
+    const container = document.getElementById("app");
+    const root = createRoot(container!);
+
+    root.render(<SLTApp></SLTApp>);
 }
-
-const container = document.getElementById("app");
-const root = createRoot(container!);
-
-root.render(<Test></Test>);

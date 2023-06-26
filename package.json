@@ -12,7 +12,7 @@
     "clean": "rm -rf lib",
     "build": "npm run clean && npm run build:ts && npm run build:bundle && cp ./package.json ./lib && cp ./README.md ./lib",
     "build:ts": "tsc",
-    "build:bundle": "parcel build --dist-dir lib --no-source-maps ./src/slt.bundle.tsx"
+    "build:bundle": "parcel build"
   },
   "devDependencies": {
     "@types/react": "^18.2.14",
@@ -22,10 +22,20 @@
   },
   "dependencies": {
     "mobx": "^6.9.0",
+    "mobx-react": "^7.6.0",
     "mobx-state-tree": "^5.1.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "three": "^0.153.0",
     "typescript": "^5.1.3"
   },
-  "main": "./lib/slt.js"
+  "main": "./lib/slt.js",
+  "targets": {
+    "bundle": {
+      "source": "src/slt.bundle.tsx",
+      "distDir": "lib",
+      "optimize": false,
+      "sourceMap": false
+    }
+  }
 }
