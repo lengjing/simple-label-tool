@@ -8,7 +8,11 @@
     "ai"
   ],
   "scripts": {
-    "start": "parcel index.html --no-source-maps"
+    "start": "parcel index.html --no-source-maps",
+    "clean": "rm -rf lib",
+    "build": "npm run clean && npm run build:ts && npm run build:bundle && cp ./package.json ./lib && cp ./README.md ./lib",
+    "build:ts": "tsc",
+    "build:bundle": "parcel build --dist-dir lib --no-source-maps ./src/slt.bundle.tsx"
   },
   "devDependencies": {
     "@types/react": "^18.2.14",
@@ -19,5 +23,6 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
-  }
+  },
+  "main": "./lib/slt.js"
 }
