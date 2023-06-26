@@ -12,7 +12,7 @@
     "clean": "rm -rf lib",
     "build": "npm run clean && npm run build:ts && npm run build:bundle && cp ./package.json ./lib && cp ./README.md ./lib",
     "build:ts": "tsc",
-    "build:bundle": "parcel build"
+    "build:bundle": "rm -f lib/slt.bundle.js && parcel build"
   },
   "devDependencies": {
     "@types/react": "^18.2.14",
