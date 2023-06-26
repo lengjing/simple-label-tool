@@ -10,7 +10,7 @@
   "scripts": {
     "start": "parcel index.html --no-source-maps",
     "clean": "rm -rf lib",
-    "build": "npm run clean && npm run build:ts && npm run build:bundle && cp ./package.json ./lib && cp ./README.md ./lib",
+    "build": "npm run clean && npm run build:ts && npm run build:bundle",
     "build:ts": "tsc",
     "build:bundle": "rm -f lib/slt.bundle.js && parcel build"
   },
