@@ -1,5 +1,9 @@
 import SLTContainer from './components/SLTContainer';
+import SLTWorkspace from './components/SLTWorkspace';
 
 export {
-    SLTContainer
+    SLTContainer,
+    SLTWorkspace,
 }
+
+export * from './models/store';
