@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 
 PCDLoader = function (serverMode) {
-    this.serverMode = serverMode;
+    this.serverMode = false;
 };
 
 PCDLoader.prototype = {
@@ -132,7 +132,8 @@ PCDLoader.prototype = {
             return PCDheader;
         }
 
-        var textData = this.serverMode ? (Buffer.from(data)).toString() : THREE.LoaderUtils.decodeText(data);
+        // var textData = this.serverMode ? (Buffer.from(data)).toString() : THREE.LoaderUtils.decodeText(data);
+        var textData = THREE.LoaderUtils.decodeText(data);
 
         // parse header (always ascii format)
         var PCDheader = parseHeader(textData);

@@ -1,11 +1,14 @@
-import React from 'react';
+import { observer } from 'mobx-react';
+import React, { PropsWithChildren } from 'react';
 
-export default class SLTContainer extends React.Component{
-    render(): React.ReactNode {
-        return (
-            <div className="slt-container">
-                
-            </div>
-        )
-    }
-}
+const SLTContainer: React.FC<PropsWithChildren> = observer(({
+    children
+}) => {
+    return (
+        <div className="slt-container" style={{ width: '100vw', height: '100vh' }}>
+            {children}
+        </div>
+    )
+})
+
+export default SLTContainer;

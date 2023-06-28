@@ -1,4 +1,4 @@
-import { types } from "mobx-state-tree";
+import { Instance, types } from "mobx-state-tree";
 
 const Pager = types.model("Pager", {
   page: 0,
@@ -41,13 +41,13 @@ export const Store = types
 
     creatingElement: types.maybeNull(Element),
 
-    contextMenu: ContextMenu,
+    contextMenu: types.maybeNull(ContextMenu),
 
     resources: types.array(Resource),
 
-    WorkspaceTheme: WorkspaceTheme,
+    workspaceTheme: WorkspaceTheme,
 
-    pager: Pager,
+    // pager: Pager,
   })
   .views((self) => {
     return {
@@ -56,7 +56,7 @@ export const Store = types
       },
 
       get resource() {
-        return 1;
+        return self.resources[0];
       },
     };
   })
@@ -64,6 +64,16 @@ export const Store = types
     return {};
   });
 
-export const createStore = () => {
-  return Store.create();
+export const createStore: (
+  ...args: Parameters<typeof Store["create"]>
+) => IStore = (init, env) => {
+  return Store.create(
+    {
+      workspaceTheme: "light",
+      ...init,
+    },
+    env
+  );
 };
+
+export type IStore = Instance<typeof Store>;
