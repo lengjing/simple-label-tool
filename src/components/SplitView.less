@@ -1,0 +1,34 @@
+.split-view {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    .view-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      &.vertical {
+        flex-direction: column;
+      }
+      &.horizontal {
+        flex-direction: row;
+      }
+    }
+    .sash-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      .sash {
+        position: absolute;
+        z-index: 35;
+        // background-color: red;
+        &:hover {
+          cursor: col-resize;
+        }
+        user-select: none;
+      }
+    }
+  }
+  

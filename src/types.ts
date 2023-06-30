@@ -30,12 +30,22 @@ export type IPCD = {
 };
 
 export type IPosition = {
-  x: number,
-  y: number
-}
+  x: number;
+  y: number;
+};
 
-export type IPoint = [x: number, y: number]
+export type IPoint = [x: number, y: number];
 
-export type ICloudPosition = { x: number; y: number; z: number; labelIndex: number };
+export type ICloudPosition = {
+  x: number;
+  y: number;
+  z: number;
+  labelIndex: number;
+};
 
 export type IShaderMode = "gray" | "intensity" | "height";
+
+export type ICssSize = {
+  width: number | string;
+  height: number | string;
+};

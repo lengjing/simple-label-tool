@@ -1,7 +1,7 @@
 import Color from "color";
 
 export const genHslColorMap = (size = 360) => {
-  const obj:{[k: string]: any} = {};
+  const obj: { [k: string]: any } = {};
   Array.from(Array(size)).map((v, i) => {
     obj[i] = Color.hsl([i, 50, 50]).hex();
   });

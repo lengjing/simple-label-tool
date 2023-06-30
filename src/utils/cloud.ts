@@ -101,13 +101,15 @@ export default class Cloud {
 
   hslColorMap = genHslColorMap();
 
-  get targetIndices() {
-    return this.cameraPresetTarget === "visible"
-      ? this.visibleIndices
-      : this.selectedIndices.length
-      ? this.selectedIndices
-      : this.visibleIndices;
-  }
+  pcd?: IPCD;
+
+  // get targetIndices() {
+  //   return this.cameraPresetTarget === "visible"
+  //     ? this.visibleIndices
+  //     : this.selectedIndices.length
+  //     ? this.selectedIndices
+  //     : this.visibleIndices;
+  // }
 
   init(options: {
     canvas: HTMLCanvasElement;
@@ -204,20 +206,9 @@ export default class Cloud {
   animate = (time: number) => {
     this.updateCamera(time);
     this.updateRaycaster();
-    this.updateProjection();
+    // this.updateProjection();
     requestAnimationFrame((time) => this.animate(time));
   };
-
-  dispose() {
-    this.scene.clear();
-    this.camera.clear();
-    this.controls.dispose();
-    this.renderer.dispose();
-    this.renderer
-      .getContext()
-      .getExtension("WEBGL_lose_context")
-      ?.loseContext();
-  }
 
   render = () => {
     this.renderer.render(this.scene, this.camera);
@@ -225,23 +216,31 @@ export default class Cloud {
 
   renderPCDFile(pcd: IPCD) {
     this.scene.remove(this.cloudObject);
-    const { position, label, intensity, object } = pcd;
+    const { position, label, intensity, object } = (this.pcd = pcd);
 
     this.cloudData = [];
     const geometry = new THREE.BufferGeometry();
-    let obj: ICloudPosition;
+    let pos: ICloudPosition;
 
     position.forEach((v, i) => {
       switch (i % 3) {
         case 0:
-          obj = { x: v, y: 0, z: 0, labelIndex: -1 };
+          pos = { x: v, y: 0, z: 0, labelIndex: -1 };
           break;
         case 1:
-          obj.y = v;
+          pos.y = v;
           break;
         case 2:
-          obj.z = v;
-          this.cloudData.push(obj);
+          pos.z = v;
+          if (isNaN(pos.x) || isNaN(pos.y) || isNaN(pos.z)) {
+            pos = {
+              ...pos,
+              x: 0,
+              y: 0,
+              z: 0,
+            };
+          }
+          this.cloudData.push(pos);
           break;
       }
     });
@@ -321,6 +320,20 @@ export default class Cloud {
     points.forEach((p) => {
       return p.project(this.camera);
     });
+
+    return points;
+  }
+
+  getPointColor(idx: number) {
+    switch (this.shaderMode) {
+      case "height":
+      case "gray":
+        return "#CFCFCF";
+      case "intensity":
+        return this.hslColorMap[this.pcd!.intensity[idx]];
+      default:
+        return "#CFCFCF";
+    }
   }
 
   fitView(eye3: THREE.Vector3, tar3: THREE.Vector3) {
@@ -350,7 +363,7 @@ export default class Cloud {
 
     eye = arg0;
     target = arg1;
-    const center = this.getCenter(this.targetIndices);
+    const center = this.getCenter([...this.visibleIndices]);
     const z = center.z + this.cameraSlope;
     if (!eye) {
       switch (this.cameraPosition) {
@@ -465,7 +478,7 @@ export default class Cloud {
 
   updateSphere() {
     const points: THREE.Vector3[] = [];
-    this.targetIndices.forEach((idx) => {
+    this.visibleIndices.forEach((idx) => {
       const item = this.cloudData[idx];
       points.push(new THREE.Vector3(item.x, item.y, item.z));
     });
@@ -528,16 +541,15 @@ export default class Cloud {
     });
   }
 
-  getPointColor(idx: number) {
-    switch (this.shaderMode) {
-      case "height":
-      case "gray":
-        return "#CFCFCF";
-      // case "intensity":
-      //   return this.hslColorMap[this.intensity[idx]];
-      default:
-        return "#CFCFCF";
-    }
+  dispose() {
+    this.scene.clear();
+    this.camera.clear();
+    this.controls.dispose();
+    this.renderer.dispose();
+    this.renderer
+      .getContext()
+      .getExtension("WEBGL_lose_context")
+      ?.loseContext();
   }
 
   resize(width: number, height: number) {
@@ -553,4 +565,38 @@ export default class Cloud {
     this.pointer.x = ((e.pageX - left) / this.width) * 2 - 1;
     this.pointer.y = -((e.pageY - top) / this.height) * 2 + 1;
   };
+
+  setPointSize(size: number) {
+    this.pointSize = size;
+    // @ts-ignore
+    this.cloudObject.material.size = size;
+    this.render();
+  }
+
+  setShaderMode(mode: IShaderMode) {
+    this.shaderMode = mode;
+    const colors: number[] = [];
+    if (this.pcd?.label) {
+      this.pcd.label.forEach((v, i) => {
+        if (this.cloudData[i]) {
+          this.cloudData[i].labelIndex = v;
+          const rgb = hex2rgb(this.getPointColor(i));
+          colors.push(rgb[0], rgb[1], rgb[2]);
+        }
+      });
+    }
+    // const
+    this.cloudObject.geometry.setAttribute(
+      "color",
+      new THREE.Float32BufferAttribute(colors, 3)
+    );
+    this.render();
+  }
+
+  setViewMode(mode: "3d" | "top") {
+    this.cameraMode = mode === "3d" ? "perspective" : "orthographic";
+    this.initCamera();
+    this.render();
+    this.moveCamera();
+  }
 }

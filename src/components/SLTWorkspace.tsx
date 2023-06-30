@@ -2,13 +2,19 @@ import React, { PropsWithChildren } from 'react';
 import { observer } from 'mobx-react';
 import { useStore } from '../context';
 
-const SLTWorkspace: React.FC<PropsWithChildren> = observer(({
+type SLTWorkspaceProps = {
+    width?: number | string
+    height?: number | string
+} & PropsWithChildren;
+const SLTWorkspace: React.FC<SLTWorkspaceProps> = observer(({
+    width = '100%',
+    height = '100%',
     children
 }) => {
     const store = useStore();
 
     return (
-        <div className="slt-workspace" style={{ height: '100%' }}>
+        <div className="slt-workspace" style={{ width, height }}>
             {store.workspaceTheme}
             {children}
         </div>

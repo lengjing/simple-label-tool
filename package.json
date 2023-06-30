@@ -15,6 +15,7 @@
     "build:bundle": "rm -f lib/slt.bundle.js && parcel build"
   },
   "devDependencies": {
+    "@parcel/transformer-less": "2.9.3",
     "@types/color": "^3.0.3",
     "@types/lodash": "^4.14.195",
     "@types/react": "^18.2.14",
@@ -24,14 +25,19 @@
     "process": "^0.11.10"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.13.6",
     "@tweenjs/tween.js": "^21.0.0",
     "color": "^4.2.3",
+    "konva": "^9.2.0",
     "lodash": "^4.17.21",
     "mobx": "^6.9.0",
     "mobx-react": "^7.6.0",
     "mobx-state-tree": "^5.1.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-konva": "^18.2.10",
     "three": "^0.153.0",
     "typescript": "^5.1.3"
   },
