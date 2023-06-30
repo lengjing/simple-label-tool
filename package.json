@@ -9,10 +9,11 @@
   ],
   "scripts": {
     "start": "parcel index.html",
-    "clean": "rm -rf lib",
-    "build": "npm run clean && npm run build:ts && npm run build:bundle",
-    "build:ts": "tsc",
-    "build:bundle": "rm -f lib/slt.bundle.js && parcel build"
+    "build": "npm run build:src && npm run build:bundle && npm build:gh-pages",
+    "build:src": "rm -rf lib && tsc",
+    "build:bundle": "rm -f lib/slt.bundle.js && parcel build --no-cache --target bundle",
+    "build:gh-pages": "rm -rf dist && parcel build --no-cache --public-url /simple-label-tool --target .",
+    "publish:gh-pages": "gh-pages -d dist"
   },
   "devDependencies": {
     "@parcel/transformer-less": "2.9.3",
@@ -21,6 +22,7 @@
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.6",
     "@types/three": "^0.152.1",
+    "gh-pages": "^5.0.0",
     "parcel": "^2.9.3",
     "process": "^0.11.10"
   },
@@ -29,6 +31,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.13.6",
     "@tweenjs/tween.js": "^21.0.0",
+    "classnames": "^2.3.2",
     "color": "^4.2.3",
     "konva": "^9.2.0",
     "lodash": "^4.17.21",
@@ -48,6 +51,9 @@
       "distDir": "lib",
       "optimize": false,
       "sourceMap": false
+    },
+    ".": {
+      "source": "index.html"
     }
   }
 }

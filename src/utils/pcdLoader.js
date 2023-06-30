@@ -1,7 +1,7 @@
 // https://github.com/Hitachi-Automotive-And-Industry-Lab/semantic-segmentation-editor/blob/master/imports/editor/3d/SsePCDLoader.js
 import * as THREE from 'three';
 
-PCDLoader = function (serverMode) {
+function PCDLoader(serverMode) {
     this.serverMode = false;
 };
 
