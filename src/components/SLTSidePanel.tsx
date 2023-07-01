@@ -1,19 +1,25 @@
 import { observer } from 'mobx-react';
 import React, { PropsWithChildren } from 'react';
+import { useStore } from '../context';
+import { ICssSize } from '../types';
+import Classification from './Classification';
 
 
-type SLTSidePanelProps = {
-    width?: number | string
-    height?: number | string
-} & PropsWithChildren
-const SLTSidePanel: React.FC<SLTSidePanelProps> = observer(({
+const SLTSidePanel: React.FC<Partial<ICssSize>> = observer(({
     width = '100%',
     height = '100%',
-    children
 }) => {
+    const store = useStore();
+
     return (
         <div className='side-panel' style={{ width, height }}>
-            {children}
+            <div className='classifications'>
+                {store.classifications.map(classification => {
+                    return (
+                        <Classification key={classification.name} {...classification}></Classification>
+                    )
+                })}
+            </div>
         </div>
     )
 })

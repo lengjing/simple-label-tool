@@ -22,17 +22,15 @@ const SLTApp: React.FC<PropsWithChildren<{ store: IStore }>> = ({
                     <SplitView views={[
                         {
                             element: (
-                                <SLTSidePanel key="slt-side-panel">
-                                    <Classification></Classification>
-                                </SLTSidePanel>
+                                <SLTSidePanel key="slt-side-panel"></SLTSidePanel>
                             ),
                             init: 0.2
                         },
                         {
                             element: (
                                 // <SLTWorkspace key="slt-workspace">
-                                // <SLTPlane></SLTPlane>
-                                <SLTCloud pcdUrl='https://www.stardust-ai.com/asset/annotationTool/pointCloud/PointCloudObjectRecognition/2/2022-02-27-12-23-00_frame_000002.pcd'></SLTCloud>
+                                <SLTPlane></SLTPlane>
+                                // <SLTCloud pcdUrl='https://www.stardust-ai.com/asset/annotationTool/pointCloud/PointCloudObjectRecognition/2/2022-02-27-12-23-00_frame_000002.pcd'></SLTCloud>
                                 // </SLTWorkspace>
                             ),
                             init: 0.8,

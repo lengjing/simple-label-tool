@@ -1,18 +1,15 @@
+import { observer } from 'mobx-react';
 import React from 'react';
-import { useStore } from '../context';
+import { IClassification } from '../models/store'
 
-const Classification = () => {
-    const store = useStore();
+const Classification: React.FC<IClassification> = observer(({name, color, properties}) => {
 
     return (
-        <div className='classifications'>
-            {store.classifications.map(classification => {
-                return (
-                    <div key={classification.key} style={{ backgroundColor: classification.color }}>{classification.key}</div>
-                )
-            })}
+        <div className='classification'>
+            <div style={{ backgroundColor: color }}>{name}</div>
+            <div></div>
         </div>
     )
-}
+})
 
 export default Classification;

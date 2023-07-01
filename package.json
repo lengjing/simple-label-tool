@@ -22,6 +22,7 @@
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.6",
     "@types/three": "^0.152.1",
+    "@types/uuid": "^9.0.2",
     "gh-pages": "^5.0.0",
     "parcel": "^2.9.3",
     "process": "^0.11.10"
@@ -29,6 +30,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.6",
     "@tweenjs/tween.js": "^21.0.0",
     "classnames": "^2.3.2",
@@ -42,7 +44,8 @@
     "react-dom": "^18.2.0",
     "react-konva": "^18.2.10",
     "three": "^0.153.0",
-    "typescript": "^5.1.3"
+    "typescript": "^5.1.3",
+    "uuid": "^9.0.0"
   },
   "main": "./lib/slt.js",
   "targets": {
