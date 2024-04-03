@@ -45,7 +45,15 @@ export type ICloudPosition = {
 
 export type IShaderMode = "gray" | "intensity" | "height";
 
+export type IViewMode = "3D" | "top";
+
 export type ICssSize = {
   width: number | string;
   height: number | string;
 };
+
+export type IVector2 = {x: number, y: number};
+
+export type IVector3 = {x: number, y: number, z: number};
+
+export type EventType = "mouseDown" | "mouseMove" | "mouseUp" | "dragStart" | "drag" | "dragEnd" | "resizeStart" | "resize" | "resizeEnd" | "drawStart" | "draw" | "drawEnd";

@@ -33,5 +33,10 @@ export * from './context';
 export const createSLTApp: (opts: { container: HTMLElement, store: IStore }) => void = ({ container, store }) => {
     const root = createRoot(container);
 
+    if(process.env.NODE_ENV !== 'production'){
+        // @ts-ignore
+        window.store = store;
+    }
+
     root.render(<SLTApp store={store}></SLTApp>);
 }

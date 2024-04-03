@@ -1,9 +1,10 @@
 import * as TWEEN from "@tweenjs/tween.js";
 import * as THREE from "three";
-import { ICloudPosition, IPCD, IShaderMode } from "../types.js";
-import { genHslColorMap, hex2rgb } from "./color.js";
-import { DOUBLEPI, moduloHalfPI } from "./math.js";
-import { OrbitControls } from "./orbitControls.js";
+import { ICloudPosition, IPCD, IShaderMode } from "../../types.js";
+import { genHslColorMap, hex2rgb } from "../../utils/color.js";
+import { DOUBLEPI, moduloHalfPI } from "../../utils/math.js";
+import { OrbitControls } from "../../utils/orbitControls.js";
+import { ICubeElement } from "../../slt.js";
 
 export default class Cloud {
   // 场景
@@ -24,6 +25,13 @@ export default class Cloud {
   cloudObject!: THREE.Points;
   // 点云数据
   cloudData: ICloudPosition[] = [];
+  // cube 对象
+  cubeObjects = new Map<
+    string,
+    THREE.Mesh<THREE.BoxGeometry, THREE.MeshBasicMaterial>
+  >();
+  // three obj uuid 和 element id匹配表
+  objectUUIDMaps = new Map<string, string>();
   // 高亮点的索引
   highlightedIndex = -1;
   // 相交的对象
@@ -43,9 +51,9 @@ export default class Cloud {
   // 画布
   canvas!: HTMLCanvasElement;
   // 画布宽度
-  width = 0;
+  width!: number;
   // 画布高度
-  height = 0;
+  height!: number;
   // 画布容器
   container!: HTMLElement;
   // 着色模式
@@ -64,9 +72,9 @@ export default class Cloud {
   cameraPresetTarget: "selected" | "visible" = "visible";
   // 视角切换动画
   tween = false;
-  // 时长
+  // 动画时长
   tweenDuration = 500;
-  // 状态
+  // 相机状态
   cameraState = {
     moving: false,
     position: 0,
@@ -116,12 +124,7 @@ export default class Cloud {
     container: HTMLElement;
     width: number;
     height: number;
-    shaderMode?: IShaderMode;
   }) {
-    if (options.shaderMode) {
-      this.shaderMode = options.shaderMode;
-    }
-    // this.cameraMode = options.cameraMode;
     const canvasWidth = (this.width = options.width);
     const canvasHeight = (this.height = options.height);
     // scene
@@ -286,6 +289,74 @@ export default class Cloud {
     this.render();
   }
 
+  renderCube(cube: ICubeElement) {
+    const {
+      value: {
+        size: { width, height, depth: length },
+        position,
+        rotation,
+      },
+      color,
+      id,
+    } = cube;
+
+    this.removeCube(id);
+
+    const geometry = new THREE.BoxGeometry(width, length, height); // z up
+
+    const mesh = new THREE.Mesh(
+      geometry,
+      new THREE.MeshBasicMaterial({ color, opacity: 0.2, transparent: true })
+    );
+
+    // line
+    const edges = new THREE.EdgesGeometry(geometry);
+    //  const _color = new THREE.Color(this._selected ? "white" : color);
+    const line = new THREE.LineSegments(
+      edges,
+      new THREE.LineBasicMaterial({ color })
+    );
+
+    mesh.add(line);
+
+    // arrow helper
+    const dir = new THREE.Vector3(0, 1, 0);
+    const arrow = new THREE.ArrowHelper(
+      dir,
+      new THREE.Vector3(0, 0, 0),
+      length * 0.7
+    );
+
+    mesh.add(arrow);
+
+    // plane
+    const plane = new THREE.Mesh(
+      new THREE.PlaneGeometry(width, height),
+      new THREE.MeshBasicMaterial({
+        side: THREE.DoubleSide,
+        transparent: true,
+        depthWrite: false,
+        opacity: 0.7,
+        color,
+      })
+    );
+
+    plane.rotateX(Math.PI / 2);
+    plane.position.setY(length / 2);
+
+    mesh.add(plane);
+
+    mesh.position.set(position.x, position.y, position.z);
+    mesh.rotation.set(rotation.x, rotation.y, rotation.z);
+
+    this.scene.add(mesh);
+
+    this.render();
+
+    this.cubeObjects.set(cube.id, mesh);
+    this.objectUUIDMaps.set(mesh.uuid, cube.id);
+  }
+
   cameraPreset(
     position: "front" | "top" | "side" = "front",
     slope = 0,
@@ -357,9 +428,9 @@ export default class Cloud {
     this._moveCamera(newEyeVec3, targetVec3);
   }
 
-  moveCamera(arg0: THREE.Vector3, arg1: THREE.Vector3) {
-    let eye: THREE.Vector3;
-    let target: THREE.Vector3;
+  moveCamera(arg0?: THREE.Vector3, arg1?: THREE.Vector3) {
+    let eye: THREE.Vector3 | undefined;
+    let target: THREE.Vector3 | undefined;
 
     eye = arg0;
     target = arg1;
@@ -597,6 +668,45 @@ export default class Cloud {
     this.cameraMode = mode === "3d" ? "perspective" : "orthographic";
     this.initCamera();
     this.render();
-    this.moveCamera();
+    // this.moveCamera();
+  }
+
+  getCube(id: string) {
+    return this.cubeObjects.get(id);
+  }
+
+  removeCube(id: string) {
+    const obj = this.cubeObjects.get(id);
+    if (obj) {
+      this.scene.remove(obj);
+      this.render();
+
+      this.cubeObjects.delete(id);
+      this.objectUUIDMaps.delete(obj.uuid)
+    }
+  }
+
+  // 更新box face 投影信息
+  updateCubeFaceProjection() {
+  }
+
+  unproject(vec: THREE.Vector3, camera: THREE.Camera) {
+    if (camera instanceof THREE.PerspectiveCamera) {
+      // const camera = this.editor.mainCloud.camera;
+      // var vec = new THREE.Vector3(); // create once and reuse
+      const pos = new THREE.Vector3(); // create once and reuse
+
+      vec.unproject(camera);
+
+      vec.sub(camera.position).normalize();
+
+      const distance = -camera.position.z / vec.z;
+
+      pos.copy(camera.position).add(vec.multiplyScalar(distance));
+
+      return pos;
+    } else {
+      return vec.unproject(camera);
+    }
   }
 }

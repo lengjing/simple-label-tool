@@ -1,169 +1,309 @@
-import { Instance, types } from "mobx-state-tree";
+import { pull } from "lodash";
+import { Instance, clone, types } from "mobx-state-tree";
+import { v4 as uuid } from "uuid";
 
 export const Vector2 = types.model({
-    x: types.number,
-    y: types.number,
+  x: types.number,
+  y: types.number,
 });
 
 export const Vector3 = types.model({
-    x: types.number,
-    y: types.number,
-    z: types.number,
+  x: types.number,
+  y: types.number,
+  z: types.number,
 });
 
 export const Property = types.model({});
 
 export const Classification = types.model({
-    name: types.identifier,
-    color: types.string,
-    properties: types.maybeNull(types.array(Property)),
+  name: types.maybeNull(types.string),
+  id: types.identifier,
+  color: types.string,
+  properties: types.maybeNull(types.array(Property)),
 });
 
-const BaseElement = types.model({
+const BaseElement = types
+  .model({
     id: types.identifier,
-    uuid: types.identifier,
+    uuid: types.string,
     color: types.string,
     visible: types.boolean,
-    // position: types.union(Vector2, Vector3),
     /**
-     * classification key
+     * classification id
      */
     key: types.maybeNull(types.string),
-});
-// .actions((self) => {
-//   return {
-//     remove() {},
-//     hide() {
-//       self.visible = false;
-//     },
-//     show() {
-//       self.visible = true;
-//     },
-//   };
-// });
+  })
+  .actions((self) => {
+    return {
+      hide() {
+        self.visible = false;
+      },
+
+      show() {
+        self.visible = true;
+      },
+    };
+  });
 
 export const RectElement = types.compose(
-    BaseElement,
-    types.model({
-        position: Vector2,
-        type: types.literal("rect"),
-        value: types.model({
-            width: types.number,
-            height: types.number,
-        }),
-    })
+  BaseElement,
+  types.model({
+    position: Vector2,
+    type: types.literal("rect"),
+    value: types.model({
+      width: types.number,
+      height: types.number,
+    }),
+  })
 );
 
 export const CircleElement = types.compose(
-    BaseElement,
-    types.model({
-        position: Vector2,
-        type: types.literal("circle"),
-        value: types.model({
-            x: types.number,
-            y: types.number,
-        }),
-    })
+  BaseElement,
+  types.model({
+    position: Vector2,
+    type: types.literal("circle"),
+    value: types.model({
+      x: types.number,
+      y: types.number,
+    }),
+  })
 );
 
-export const CubeElement = types.compose(
+/**
+ *
+ *   6 ---- 4 max
+ *   |\     |\
+ *   | \    | \
+ *   7 -\-- 5  \ --> length (y)
+ *    \  \ * ---\--> position
+ *     \  2 ---- 0
+ *      \ |front |
+ *       \|      | --> height (z)
+ *    min 3 ---- 1
+ *           |--> width (x)
+ */
+export const CubeElement = types
+  .compose(
     BaseElement,
     types.model({
+      position: Vector3,
+      type: types.literal("cube"),
+      value: types.model({
         position: Vector3,
-        type: types.literal("cube"),
-        value: types.model({
-            vertexes: types.array(Vector2),
-            position: Vector3,
-            size: types.model({
-                deepth: types.number,
-                width: types.number,
-                height: types.number,
-            }),
-            rotation: Vector3,
+        size: types.model({
+          depth: types.number,
+          width: types.number,
+          height: types.number,
         }),
+        rotation: Vector3,
+      }),
     })
-);
+  )
+  .actions((self) => {
+    return {
+      reposition(x: number, y: number, z: number) {
+        self.position.x = self.value.position.x = x;
+        self.position.y = self.value.position.y = y;
+        self.position.z = self.value.position.z = z;
+      },
+
+      resizeX(val: number) {
+        self.value.size.width = val;
+      },
+
+      resizeY(val: number) {
+        self.value.size.depth = val;
+      },
+
+      resizeZ(val: number) {
+        self.value.size.height = val;
+      },
+
+      resize(x: number, y: number, z: number) {
+        this.resizeX(x);
+        this.resizeY(y);
+        this.resizeZ(z);
+      },
+
+      rotateX(val: number) {
+        self.value.rotation.x = val;
+      },
+
+      rotateY(val: number) {
+        self.value.rotation.y = val;
+      },
+
+      rotateZ(val: number) {
+        self.value.rotation.z = val;
+      },
+
+      rotate(x: number, y: number, z: number) {
+        this.rotateX(x);
+        this.resizeY(y);
+        this.rotateZ(z);
+      },
+    };
+  });
 
 export const Element = types.union(RectElement, CircleElement, CubeElement);
 
 const Menu = types.model({
-    key: types.string,
-    title: types.string,
-    // children: types.maybeNull(types.)
+  key: types.string,
+  title: types.string,
+  // children: types.maybeNull(types.)
 });
 
 const ContextMenu = types.model({
-    position: Vector2,
-    visible: types.boolean,
-    menus: types.array(Menu),
+  position: Vector2,
+  visible: types.boolean,
+  menus: types.array(Menu),
 });
 
-const ToolMenu = types.model({
-
-});
+const ToolMenu = types.model({});
 
 const WorkspaceTheme = types.enumeration(["light", "dark"]);
 
+const MouseAction = types.enumeration(["select", "draw", "drag", "unknown"]);
+
+const Tool = types.enumeration(["cube", "rect"]);
+
+let elementId = 0;
+
 export const Store = types
-    .model("Store", {
-        scale: 1,
+  .model("Store", {
+    scale: 1,
 
-        selectedElementIds: types.array(types.string),
+    selectedElementIds: types.array(types.string),
 
-        elements: types.array(Element),
+    elements: types.array(Element),
 
-        creatingElement: types.maybeNull(Element),
+    creatingElement: types.maybeNull(Element),
 
-        workspaceTheme: types.optional(WorkspaceTheme, "light"),
+    workspaceTheme: types.optional(WorkspaceTheme, "light"),
 
-        selectedClassificationKey: types.maybeNull(types.string),
+    selectedClassificationKey: types.maybeNull(types.string),
 
-        classifications: types.array(Classification),
+    classifications: types.array(Classification),
 
-        contextMenu: types.optional(ContextMenu, {
-            visible: false,
-            position: { x: 0, y: 0 },
-        }),
+    contextMenu: types.optional(ContextMenu, {
+      visible: false,
+      position: { x: 0, y: 0 },
+    }),
 
-        // mouse: 'selection' | ''
+    mouseAction: types.optional(MouseAction, "unknown"),
 
-        // history
-    })
-    .views((self) => {
-        return {
-            get selectedElements() {
-                return "1";
-            },
+    _selectedTool: types.optional(Tool, "cube"),
 
-            get selectedClassification() {
-                return self.classifications.find(c => c.name === self.selectedClassificationKey)
-            }
+    // history
+  })
+  .views((self) => {
+    return {
+      get selectedElements() {
+        return "1";
+      },
+
+      get selectedClassification() {
+        return self.classifications.find(
+          (c) => c.name === self.selectedClassificationKey
+        );
+      },
+
+      get cubeElements() {
+        return self.elements.filter(
+          (el) => el.type === "cube"
+        ) as ICubeElement[];
+      },
+    };
+  })
+  .actions((self) => {
+    return {
+      getElementById(id: string) {
+        return self.elements.find((el) => el.id === id);
+      },
+
+      getElementsByIds(ids: string[]) {
+        return ids.map((id) => this.getElementById);
+      },
+
+      moveElement(id: string, to: IVector2 | IVector3) {
+        const el = this.getElementById(id);
+
+        if (el) {
+          el.position = {
+            ...el.position,
+            ...to,
+          };
+        }
+      },
+
+      deleteElement(id: string) {
+        const el = this.getElementById(id);
+
+        if (el) {
+          pull(self.elements, el);
+        }
+      },
+
+      createElement(element: Partial<IElement>) {
+        const extra = {
+          id: `${elementId++}`,
+          uuid: uuid(),
+          visible: true,
         };
-    })
-    .actions((self) => {
-        return {
-            getElementById(id: string) {
-                return self.elements.find((el) => el.id === id);
-            },
-            getElementsByIds(ids: string[]) {
-                return ids.map(id => this.getElementById);
-            },
-            moveElement(id: string, to: IVector2) {
-                const el = this.getElementById(id);
-                if (el) {
-                    el.position = {
-                        ...el.position,
-                        ...to
-                    }
-                }
-            },
-        };
-    });
+
+        let creatingElement: IElement | null = null;
+
+        if (element.type === "cube") {
+          creatingElement = CubeElement.create({
+            ...(element as ICubeElement),
+            ...extra,
+          });
+        } else if (element.type === "circle") {
+          creatingElement = CircleElement.create({
+            ...(element as ICircleElement),
+            ...extra,
+          });
+        } else if (element.type === "rect") {
+          creatingElement = RectElement.create({
+            ...(element as IRectElement),
+            ...extra,
+          });
+        }
+
+        self.creatingElement = creatingElement;
+      },
+
+      createdElement() {
+        if (self.creatingElement) {
+          self.elements.push(clone(self.creatingElement));
+          self.creatingElement = null;
+        }
+      },
+
+      setMouseAction(action: IMouseAction) {
+        self.mouseAction = action;
+      },
+
+      setSelectedElement(id: string, multi = false) {
+        if (multi) {
+          self.selectedElementIds.push(id);
+        } else {
+          self.selectedElementIds.clear().push(id);
+        }
+      },
+
+      setSelectedTool(tool: Instance<typeof Tool>) {
+        self._selectedTool = tool;
+      },
+
+      updateCubeFaceProjection() {},
+    };
+  });
 
 export const createStore: (
-    ...args: Parameters<typeof Store["create"]>
+  ...args: Parameters<typeof Store["create"]>
 ) => IStore = (...args) => {
-    return Store.create(...args);
+  return Store.create(...args);
 };
 
 export type IClassification = Instance<typeof Classification>;
@@ -174,8 +314,12 @@ export type ICircleElement = Instance<typeof CircleElement>;
 
 export type ICubeElement = Instance<typeof CubeElement>;
 
-export type IVector2 = Instance<typeof Vector2>;
+export type IElement = Instance<typeof Element>;
 
-export type IVector3 = Instance<typeof Vector3>;
+type IVector2 = Instance<typeof Vector2>;
+
+type IVector3 = Instance<typeof Vector3>;
 
 export type IStore = Instance<typeof Store>;
+
+export type IMouseAction = Instance<typeof MouseAction>;

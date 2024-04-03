@@ -21,16 +21,16 @@ const SLTPlane: React.FC<{ width?: number, height?: number }> = observer(({
     const stageRef = useRef(null);
 
     const store = useStore();
-    const onContextMenu = (e) => {
-        // stageRef.current!.batchDraw()
-    }
+    // const onContextMenu = (e) => {
+    //     // stageRef.current!.batchDraw()
+    // }
 
     const onMouseDown = (e: KonvaEventObject<MouseEvent>) => {
         const start = {
             startX: e.evt.pageX
         }
         const onMouseMove = () => {
-            
+
         }
 
         const onMouseUp = () => {
@@ -107,15 +107,23 @@ const SLTPlane: React.FC<{ width?: number, height?: number }> = observer(({
                 }>
                 {/* <Layer><Image image={}></Image></Layer> */}
                 <Layer>
-                    {store.elements.map((v, idx) => {
-                        if (v.type === "rect") {
-                            const { position, value, color } = v;
+                    {store.elements.map((element, idx) => {
+                        if (element.type === "rect") {
+                            const { position, value, color } = element;
                             return (
                                 <Rect
                                     key={idx}
                                     {...value}
                                     fill={color}
                                     draggable
+                                    {...position}
+                                    onDragMove={(e) => {
+                                        store.moveElement(element.id, {
+                                            x: element.position.x + e.evt.movementX,
+                                            y: element.position.y + e.evt.movementY,
+                                        })
+                                    }}
+
                                 ></Rect>
                             )
                         }

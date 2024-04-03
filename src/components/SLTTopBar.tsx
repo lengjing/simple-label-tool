@@ -10,10 +10,10 @@ const SLTTopBar: React.FC = observer(() => {
     const [open, setOpen] = useState(false);
 
     return (
-        <div className='slt-title-bar' style={{ height: 60, backgroundColor: "MenuText" }}>
+        <div className='slt-title-bar' style={{ height: 60, paddingRight: 20, boxShadow: "inset 0 -1px #d0d7de" }}>
             <Stack spacing={2} direction="row" justifyContent="end" alignItems="center" height={'100%'}>
-                <Button size="small" variant="contained" color="secondary">forward</Button>
-                <Button size="small" variant="contained" color="secondary">backward</Button>
+                <Button size="small" variant="contained" color="secondary" disabled>forward</Button>
+                <Button size="small" variant="contained" color="secondary" disabled>backward</Button>
                 <Button size="small" variant="contained" color="primary" onClick={() => setOpen(true)}>annotation</Button>
             </Stack>
             <Drawer
@@ -23,13 +23,11 @@ const SLTTopBar: React.FC = observer(() => {
             >
                 <div className='annotations' style={{ width: 400 }}>
                     <pre>
-                        {JSON.stringify({
-                            annotations: store.elements.map(el => {
-                                const { id, value, key } = el;
+                        {JSON.stringify(store.elements.map(el => {
+                            const { id, value, key } = el;
 
-                                return { id, value, key }
-                            })
-                        }, null, 2)}
+                            return { id, value, key }
+                        }), null, 2)}
                     </pre>
                 </div>
             </Drawer>
