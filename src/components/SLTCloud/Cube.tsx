@@ -15,6 +15,8 @@ type CubeProps = {
 
 const Cube: React.FC<CubeProps> = observer(({ element, draggable = false }) => {
     const cloud = useCloud();
+    // Error: [mobx-state-tree] You are trying to read or write to an object that is no longer part of a state tree. 
+    const id = element.id;
 
     useEffect(() => {
         cloud.renderCube(element);
@@ -102,7 +104,7 @@ const Cube: React.FC<CubeProps> = observer(({ element, draggable = false }) => {
         ]
 
         return () => {
-            cloud.removeCube(element.id);
+            cloud.removeCube(id);
 
             disposer.forEach(d => d());
         }

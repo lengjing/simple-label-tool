@@ -162,8 +162,8 @@ const SLTCloud = observer(forwardRef<forwardedSLTCloud, SLTCloudProps>(({
                     creatingElement.rotateZ(rotation.z);
                 }}
                 onDrawEnd={() => {
-                    store.createdElement();
                     store.setMouseAction('unknown');
+                    store.createdElement();
                 }}
             >
                 {children}

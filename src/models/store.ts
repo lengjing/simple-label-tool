@@ -1,5 +1,12 @@
 import { pull } from "lodash";
-import { Instance, clone, types } from "mobx-state-tree";
+import {
+  Instance,
+  applySnapshot,
+  clone,
+  getSnapshot,
+  onAction,
+  types,
+} from "mobx-state-tree";
 import { v4 as uuid } from "uuid";
 
 export const Vector2 = types.model({
@@ -300,10 +307,60 @@ export const Store = types
     };
   });
 
+// redo undo
+const UndoableStore = Store.volatile(() => {
+  return {
+    history: [] as any[],
+    currentStateIndex: -1,
+  };
+})
+  .views((self) => {
+    return {
+      get canUndo() {
+        return self.currentStateIndex > 0;
+      },
+
+      get canRedo() {
+        return self.currentStateIndex < self.history.length - 1;
+      },
+    };
+  })
+  .actions((self) => ({
+    undo() {
+      if (self.canUndo) {
+        self.currentStateIndex -= 1;
+        applySnapshot(self, self.history[self.currentStateIndex]);
+      }
+    },
+
+    redo() {
+      if (self.canRedo) {
+        self.currentStateIndex += 1;
+        applySnapshot(self, self.history[self.currentStateIndex]);
+      }
+    },
+
+    afterCreate() {
+      self.history.push(getSnapshot(self));
+      self.currentStateIndex += 1;
+
+      onAction(self, (event) => {
+        if (/^(delete)|(move)|(created)/.test(event.name)) {
+          const currentState = getSnapshot(self);
+          if (currentState !== self.history[self.currentStateIndex + 1]) {
+            self.history.splice(self.currentStateIndex + 1);
+          }
+          self.history.push(currentState);
+          self.currentStateIndex += 1;
+        }
+      });
+    },
+  }));
+
 export const createStore: (
   ...args: Parameters<typeof Store["create"]>
 ) => IStore = (...args) => {
-  return Store.create(...args);
+  return UndoableStore.create(...args);
 };
 
 export type IClassification = Instance<typeof Classification>;
@@ -320,6 +377,6 @@ type IVector2 = Instance<typeof Vector2>;
 
 type IVector3 = Instance<typeof Vector3>;
 
-export type IStore = Instance<typeof Store>;
+export type IStore = Instance<typeof UndoableStore>;
 
 export type IMouseAction = Instance<typeof MouseAction>;
