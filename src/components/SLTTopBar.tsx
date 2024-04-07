@@ -12,8 +12,8 @@ const SLTTopBar: React.FC = observer(() => {
     return (
         <div className='slt-title-bar' style={{ height: 60, paddingRight: 20, boxShadow: "inset 0 -1px #d0d7de" }}>
             <Stack spacing={2} direction="row" justifyContent="end" alignItems="center" height={'100%'}>
-                <Button size="small" variant="contained" color="secondary" disabled>forward</Button>
-                <Button size="small" variant="contained" color="secondary" disabled>backward</Button>
+                <Button size="small" variant="contained" color="secondary" disabled={!store.canRedo} onClick={() => store.redo()}>redo</Button>
+                <Button size="small" variant="contained" color="secondary" disabled={!store.canUndo} onClick={() => store.undo()}>undo</Button>
                 <Button size="small" variant="contained" color="primary" onClick={() => setOpen(true)}>annotation</Button>
             </Stack>
             <Drawer
