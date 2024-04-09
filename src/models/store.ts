@@ -166,13 +166,11 @@ const ContextMenu = types.model({
   menus: types.array(Menu),
 });
 
-const ToolMenu = types.model({});
-
 const WorkspaceTheme = types.enumeration(["light", "dark"]);
 
 const MouseAction = types.enumeration(["select", "draw", "drag", "unknown"]);
 
-const Tool = types.enumeration(["cube", "rect"]);
+const Tool = types.enumeration(["cube", "rect", "selection", "lasso"]);
 
 let elementId = 0;
 
@@ -199,9 +197,7 @@ export const Store = types
 
     mouseAction: types.optional(MouseAction, "unknown"),
 
-    _selectedTool: types.optional(Tool, "cube"),
-
-    // history
+    selectedTool: types.optional(Tool, "cube"),
   })
   .views((self) => {
     return {
@@ -224,6 +220,10 @@ export const Store = types
   })
   .actions((self) => {
     return {
+      reset() {
+        elementId = 0;
+      },
+
       getElementById(id: string) {
         return self.elements.find((el) => el.id === id);
       },
@@ -299,8 +299,8 @@ export const Store = types
         }
       },
 
-      setSelectedTool(tool: Instance<typeof Tool>) {
-        self._selectedTool = tool;
+      setSelectedTool(tool: ITool) {
+        self.selectedTool = tool;
       },
 
       updateCubeFaceProjection() {},
@@ -380,3 +380,5 @@ type IVector3 = Instance<typeof Vector3>;
 export type IStore = Instance<typeof UndoableStore>;
 
 export type IMouseAction = Instance<typeof MouseAction>;
+
+export type ITool = Instance<typeof Tool>;

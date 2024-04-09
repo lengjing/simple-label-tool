@@ -665,10 +665,17 @@ export default class Cloud {
   }
 
   setViewMode(mode: "3d" | "top") {
-    this.cameraMode = mode === "3d" ? "perspective" : "orthographic";
-    this.initCamera();
-    this.render();
-    // this.moveCamera();
+    if (mode === "3d") {
+      this.cameraMode = "perspective";
+      // this.cameraPreset("front", 0.5);
+      this.initCamera();
+    } else if (mode === "top") {
+      this.cameraMode = "orthographic";
+      // this.cameraPreset("top", 0);
+      this.initCamera();
+      this.controls.minPolarAngle = 0;
+      this.controls.maxPolarAngle = 0;
+    }
   }
 
   getCube(id: string) {
@@ -682,13 +689,12 @@ export default class Cloud {
       this.render();
 
       this.cubeObjects.delete(id);
-      this.objectUUIDMaps.delete(obj.uuid)
+      this.objectUUIDMaps.delete(obj.uuid);
     }
   }
 
   // 更新box face 投影信息
-  updateCubeFaceProjection() {
-  }
+  updateCubeFaceProjection() {}
 
   unproject(vec: THREE.Vector3, camera: THREE.Camera) {
     if (camera instanceof THREE.PerspectiveCamera) {

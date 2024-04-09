@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { ICssSize } from "../types";
-import SLTCloudSettings from "./SLTCloudSettings";
 import SLTCloud, { forwardedSLTCloud } from "./SLTCloud";
 import SLTSubView from "./SLTSubView";
 import SLTView from "./SLTView";
@@ -30,10 +29,8 @@ const SLTSolid: React.FC<{ pcdUrl: string; } & Partial<ICssSize>> = observer(({
 
     return (
         <div className="slt-3d" style={{ width, height }}>
-            {/* <SLTCloudSettings cloud={mainCloudRef.current?.cloud}></SLTCloudSettings> */}
-
             <SLTView>
-                <SLTCloud ref={mainCloudRef} pcdUrl={pcdUrl} cameraPosition="front" cameraMode="perspective">
+                <SLTCloud ref={mainCloudRef} pcdUrl={pcdUrl} cameraPosition="front" cameraMode="perspective" settings>
                     {store.elements.filter(el => el.type === "cube").map(el => {
                         return (
                             <Cube
@@ -54,7 +51,7 @@ const SLTSolid: React.FC<{ pcdUrl: string; } & Partial<ICssSize>> = observer(({
                     )}
                 </SLTCloud>
 
-                <SLTSubView title="top view" style={{ width: 300, height: 200, left: 0, top: 0, border: '1px solid #fff' }}>
+                <SLTSubView title="top view" style={{ width: 300, height: 200, left: 0, bottom: 0, border: '1px solid #fff' }}>
                     <SLTCloud ref={topCloudRef} pcdUrl={pcdUrl} cameraPosition="top" cameraMode="orthographic">
                         {/* <InteractiveBox
                             onResizeStart={e => onBoxResizeStart(e, "front", selectedBoxId)}
@@ -67,11 +64,11 @@ const SLTSolid: React.FC<{ pcdUrl: string; } & Partial<ICssSize>> = observer(({
                     </SLTCloud>
                 </SLTSubView>
 
-                <SLTSubView title="side view" style={{ width: 300, height: 200, left: 300, top: 0, border: '1px solid #fff' }}>
+                <SLTSubView title="side view" style={{ width: 300, height: 200, left: 300, bottom: 0, border: '1px solid #fff' }}>
                     <SLTCloud ref={sideCloudRef} pcdUrl={pcdUrl} cameraPosition="side" cameraMode="orthographic"></SLTCloud>
                 </SLTSubView>
 
-                <SLTSubView title="front view" style={{ width: 300, height: 200, left: 600, top: 0, border: '1px solid #fff' }}>
+                <SLTSubView title="front view" style={{ width: 300, height: 200, left: 600, bottom: 0, border: '1px solid #fff' }}>
                     <SLTCloud ref={frontCloudRef} pcdUrl={pcdUrl} cameraPosition="front" cameraMode="orthographic"></SLTCloud>
                 </SLTSubView>
             </SLTView>

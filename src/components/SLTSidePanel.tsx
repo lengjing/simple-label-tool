@@ -1,19 +1,17 @@
 import { observer } from 'mobx-react';
-import React, { PropsWithChildren } from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../context';
 import { ICssSize } from '../types';
 import Classification from './Classification';
 import Box from '@mui/material/Box';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Divider from '@mui/material/Divider';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, TextField } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 
 const SLTSidePanel: React.FC<Partial<ICssSize>> = observer(({
     width = '100%',
     height = '100%',
 }) => {
+    const [open, setOpen] = useState(false);
     const store = useStore();
 
     return (
@@ -26,30 +24,45 @@ const SLTSidePanel: React.FC<Partial<ICssSize>> = observer(({
                             <Classification key={classification.name} {...classification}></Classification>
                         )
                     })}
+                    <IconButton onClick={() => setOpen(true)}>
+                        <AddIcon></AddIcon>
+                    </IconButton>
+
+                    {/* <Dialog
+                        open={open}
+                        onClose={() => {
+                            setOpen(false)
+                        }}
+                        PaperProps={{
+                            onSubmit: (event) => {
+                                event.preventDefault();
+                                const formData = new FormData(event.currentTarget);
+                                const formJson = Object.fromEntries((formData as any).entries());
+                                const email = formJson.email;
+                                console.log(email)
+                            },
+                        }}
+                    >
+                        <DialogTitle>add classification</DialogTitle>
+                        <DialogContent>
+                            <TextField
+                                autoFocus
+                                required
+                                margin="dense"
+                                id="name"
+                                name="email"
+                                label="Email Address"
+                                type="email"
+                                fullWidth
+                                variant="standard"
+                            />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => { }}>Cancel</Button>
+                            <Button type="submit">Subscribe</Button>
+                        </DialogActions>
+                    </Dialog> */}
                 </div>
-            </Box>
-            <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
-                <h3>tools</h3>
-                <List component="nav">
-                    <ListItemButton
-                        selected={store._selectedTool === "rect"}
-                        onClick={e => store.setSelectedTool('rect')}
-                    >
-                        {/* <ListItemIcon>
-                            <InboxIcon />
-                        </ListItemIcon> */}
-                        <ListItemText inset primary="rect" />
-                    </ListItemButton>
-                    <ListItemButton
-                        selected={store._selectedTool === "cube"}
-                        onClick={e => store.setSelectedTool("cube")}
-                    >
-                        {/* <ListItemIcon>
-                            <DraftsIcon />
-                        </ListItemIcon> */}
-                        <ListItemText inset primary="cube" />
-                    </ListItemButton>
-                </List>
             </Box>
         </div>
     )

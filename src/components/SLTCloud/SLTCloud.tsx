@@ -7,6 +7,7 @@ import { observer } from "mobx-react";
 import PCDLoader from "../../utils/pcdLoader";
 import { IPCD } from "../../types";
 import * as THREE from 'three';
+import SLTCloudSettings from "./SLTCloudSettings";
 
 const pcdLoader = new PCDLoader(false);
 
@@ -21,12 +22,14 @@ export type forwardedSLTCloud = {
 }
 
 type SLTCloudProps = PropsWithChildren<{
+    settings?: boolean
     pcdUrl: string;
     cameraPosition?: "top" | "side" | "front";
     cameraMode?: "perspective" | "orthographic"
 }>
 
 const SLTCloud = observer(forwardRef<forwardedSLTCloud, SLTCloudProps>(({
+    settings = false,
     pcdUrl,
     children,
     cameraPosition,
@@ -168,6 +171,9 @@ const SLTCloud = observer(forwardRef<forwardedSLTCloud, SLTCloudProps>(({
             >
                 {children}
             </Stage>
+            {settings && (
+                <SLTCloudSettings></SLTCloudSettings>
+            )}
         </CloudContext.Provider>
     )
 }))

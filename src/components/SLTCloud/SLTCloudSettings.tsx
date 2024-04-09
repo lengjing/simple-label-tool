@@ -3,20 +3,29 @@ import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import Slider from '@mui/material/Slider';
 import Box from '@mui/material/Box';
-import Cloud from './SLTCloud/cloud';
+import { observer } from 'mobx-react';
+import { useCloud } from './SLTCloud';
 
-const SLTCloudSettings: React.FC<{ cloud: Cloud }> = ({ cloud }) => {
+const SLTCloudSettings: React.FC<{}> = observer(() => {
+    const cloud = useCloud();
+
     return (
-        <div className="settings" style={{ height: 100 }}>
+        <div className="cloud-settings" style={{ color: "#fff", position: "absolute", top: 0, left: 20 }}>
             <Box display={"inline-block"} marginRight={20}>
                 <p>camera position</p>
                 <ButtonGroup size="small" variant="contained">
-                    <Button>front</Button>
+                    <Button onClick={() => {
+                        cloud.cameraPosition = "front";
+                        cloud.moveCamera();
+                    }}>front</Button>
+                    <Button onClick={() => {
+                        cloud.cameraPosition = "side";
+                        cloud.moveCamera();
+                    }}>side</Button>
                     <Button onClick={() => {
                         cloud.cameraPosition = "top";
                         cloud.moveCamera();
                     }}>top</Button>
-                    <Button>side</Button>
                 </ButtonGroup>
             </Box>
 
@@ -29,7 +38,7 @@ const SLTCloudSettings: React.FC<{ cloud: Cloud }> = ({ cloud }) => {
                     <Button onClick={() => {
                         cloud.setShaderMode('intensity');
                     }}>intensity</Button>
-                    <Button>height</Button>
+                    <Button disabled>height</Button>
                 </ButtonGroup>
             </Box>
 
@@ -38,9 +47,11 @@ const SLTCloudSettings: React.FC<{ cloud: Cloud }> = ({ cloud }) => {
                 <ButtonGroup size="small" variant="contained">
                     <Button onClick={() => {
                         cloud.setViewMode('3d');
+                        cloud.moveCamera();
                     }}>3D view</Button>
                     <Button onClick={() => {
                         cloud.setViewMode('top');
+                        cloud.moveCamera();
                     }}>top view</Button>
                 </ButtonGroup>
             </Box>
@@ -57,6 +68,6 @@ const SLTCloudSettings: React.FC<{ cloud: Cloud }> = ({ cloud }) => {
             </Box>
         </div>
     )
-}
+})
 
 export default SLTCloudSettings;
